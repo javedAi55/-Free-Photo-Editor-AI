@@ -21,14 +21,8 @@
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
-        h1 {
-            color: #1e3c72;
-            font-size: 24px;
-        }
-        p {
-            font-size: 16px;
-            color: #555;
-        }
+        h1 { color: #1e3c72; font-size: 24px; }
+        p { font-size: 15px; color: #555; }
         .upload-btn {
             display: block;
             width: 100%;
@@ -42,8 +36,13 @@
             cursor: pointer;
             font-weight: bold;
         }
-        .upload-btn:hover {
-            background-color: #219150;
+        #preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
         .ad-box {
             margin-top: 25px;
@@ -58,20 +57,35 @@
 
     <div class="container">
         <h1>🎨 Free Photo Editor AI</h1>
-        <p>مفت اے آئی ٹولز - تصویروں کا بیک گراؤنڈ ہٹائیں اور ایڈیٹنگ کریں!</p>
+        <p>مفت اے آئی ٹولز - تصویر اپلوڈ کریں اور دیکھیں!</p>
         
         <hr>
 
-        <h3>✨ اپلوڈ کریں اور میجک دیکھیں:</h3>
-        <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="alert('تصویر منتخب ہو گئی ہے! پروسیسنگ شروع ہو رہی ہے۔..')">
+        <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="showImage(event)">
         <button class="upload-btn" onclick="document.getElementById('imageInput').click();">🖼️ تصویر اپلوڈ کریں (Upload Photo)</button>
 
+        <!-- تصویر یہاں سکرین پر دکھے گی -->
+        <img id="preview" src="" alt="اپلوڈ شدہ تصویر">
+
         <div class="ad-box">
-            <p>📢 <strong>گوگل ایڈسینس سپیس (Ads Space)</strong></p>
+            <p>📢 <strong>گوگل ایڈسینس سپیس (Google Ads)</strong></p>
             <small>یہاں آپ کے کمائی والے اشتہارات لائیو ہوں گے!</small>
         </div>
     </div>
 
+    <script>
+        function showImage(event) {
+            var reader = new FileReader();
+            reader.onload = function(){
+                var output = document.getElementById('preview');
+                output.src = reader.result;
+                output.style.display = 'block';
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+
 </body>
 </html>
+
 
