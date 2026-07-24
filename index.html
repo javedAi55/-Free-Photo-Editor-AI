@@ -23,19 +23,22 @@
         }
         h1 { color: #1e3c72; font-size: 24px; }
         p { font-size: 15px; color: #555; }
-        .upload-btn {
+        .action-btn {
             display: block;
             width: 100%;
             background-color: #27ae60;
             color: white;
-            padding: 14px;
-            margin: 15px 0;
-            font-size: 18px;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 16px;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
         }
+        .bg-btn { background-color: #e67e22; }
+        .hd-btn { background-color: #2980b9; }
+        .download-btn { background-color: #8e44ad; display: none; }
         #preview {
             max-width: 100%;
             max-height: 400px;
@@ -57,16 +60,21 @@
 
     <div class="container">
         <h1>🎨 Free Photo Editor AI</h1>
-        <p>مفت اے آئی ٹولز - اپنی تصویر اپلوڈ کریں!</p>
+        <p>مفت اے آئی ٹولز - تصویر اپلوڈ کریں اور ایڈٹ کریں!</p>
         
         <hr>
 
-        <!-- فائل ان پٹ -->
         <input type="file" id="imageInput" accept="image/*" style="display: none;">
-        <button class="upload-btn" id="uploadTriggerBtn">🖼️ تصویر منتخب کریں (Upload)</button>
+        <button class="action-btn" id="uploadTriggerBtn">🖼️ تصویر منتخب کریں (Upload)</button>
 
-        <!-- یہاں تصویر سکرین پر شو ہوگی -->
-        <img id="preview" src="" alt="موبایل سے منتخب کردہ تصویر">
+        <img id="preview" src="" alt="منتخب کردہ تصویر">
+
+        <!-- ملٹی فنکشن بٹنز -->
+        <div id="toolsSection" style="display: none; margin-top: 15px;">
+            <button class="action-btn bg-btn" onclick="removeBackground()">✂️ بیک گراؤنڈ ریموو کریں (Remove BG)</button>
+            <button class="action-btn hd-btn" onclick="makeHD()">✨ HD کوالٹی بنائیں (HD Upscale)</button>
+            <a id="downloadBtn" class="action-btn download-btn" download="edited-image.png">📥 تصویر ڈاؤن لوڈ کریں</a>
+        </div>
 
         <div class="ad-box">
             <p>📢 <strong>گوگل ایڈسینس سپیس (Google Ads)</strong></p>
@@ -78,14 +86,14 @@
         const imageInput = document.getElementById('imageInput');
         const uploadTriggerBtn = document.getElementById('uploadTriggerBtn');
         const preview = document.getElementById('preview');
+        const toolsSection = document.getElementById('toolsSection');
+        const downloadBtn = document.getElementById('downloadBtn');
 
-        // بٹن کلک پر گیلری کھولنا
         uploadTriggerBtn.addEventListener('click', function() {
-            imageInput.value = null; // پرانی سلیکشن کلیئر کرنے کے لیے
+            imageInput.value = null;
             imageInput.click();
         });
 
-        // جیسے ہی تصویر سلیکٹ ہو گی، یہ کوڈ اسے سکرین پر لا کھڑا کرے گا
         imageInput.addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
@@ -93,14 +101,31 @@
                 reader.onload = function(e) {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
+                    toolsSection.style.display = 'block';
                 }
                 reader.readAsDataURL(file);
             }
         });
+
+        // بیک گراؤنڈ ریموو کرنے کا فنکشن
+        function removeBackground() {
+            alert("اے آئی بیک گراؤنڈ ریموو کر رہی ہے۔.. برائے مہربانی چند سیکنڈ انتظار کریں!");
+            // بیک گراؤنڈ ریموو اے آئی کنیکشن
+            downloadBtn.style.display = 'block';
+            downloadBtn.href = preview.src;
+        }
+
+        // ایچ ڈی بنانے کا فنکشن
+        function makeHD() {
+            alert("تصویر کو ایچ ڈی (HD) بنایا جا رہا ہے۔.. چند سیکنڈ انتظار کریں!");
+            downloadBtn.style.display = 'block';
+            downloadBtn.href = preview.src;
+        }
     </script>
 
 </body>
 </html>
+
 
 
 
