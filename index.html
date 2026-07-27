@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Javed AI Photo Editor - Europe Background Changer</title>
+    <title>Javed AI Photo Editor - Remove BG & Background Changer</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -39,6 +39,7 @@
             box-sizing: border-box;
         }
         .bg-btn { background-color: #e67e22; }
+        .custom-btn { background-color: #3498db; }
         .download-btn { background-color: #8e44ad; display: none; }
         #canvas {
             max-width: 100%;
@@ -70,6 +71,7 @@
             border-radius: 8px;
             border: 1px solid #ccc;
             font-size: 15px;
+            margin-bottom: 10px;
         }
         .ad-box {
             margin-top: 25px;
@@ -84,40 +86,44 @@
 
     <div class="container">
         <h1>🎨 Javed AI Photo Editor</h1>
-        <p>Remove Background & Travel to Europe! <br>(تصویر کا بیک گراؤنڈ تبدیل کریں)</p>
+        <p>Remove BG & Travel Europe or Add Custom BG <br>(بیک گراؤنڈ ختم کریں یا اپنی مرضی کا لگائیں)</p>
         
         <hr>
 
         <input type="file" id="imageInput" accept="image/*" style="display: none;">
         <button class="action-btn" id="uploadTriggerBtn">🖼️ Upload Photo (تصویر منتخب کریں)</button>
 
-        <div id="loading">⏳ Processing with AI... Please wait! (اے آئی پروسیسنگ ہو رہی ہے)</div>
+        <div id="loading">⏳ Processing with AI... Please wait! (پروسیسنگ ہو رہی ہے)</div>
 
-        <!-- کینوس جہاں یورپ کے پس منظر والی تصویر بنے گی -->
         <canvas id="canvas"></canvas>
 
         <div id="toolsSection" style="display: none;">
             <button class="action-btn bg-btn" id="removeBgBtn">✂️ 1. Remove BG (بیک گراؤنڈ ختم کریں)</button>
             
-            <!-- یورپ کی جگہ منتخب کرنے کا اپشن -->
             <div class="bg-selector" id="bgSelector">
-                <label for="europeBg">🏰 2. Select Europe Location (یورپ کی جگہ چنیں):</label>
+                <label for="europeBg">🏰 Choose Background (بیک گراؤنڈ منتخب کریں):</label>
                 <select id="europeBg">
-                    <option value="none">Transparent / No Background</option>
-                    <option value="eiffel">🗼 Paris - Eiffel Tower (فرانس)</option>
-                    <option value="colosseum">🏛️ Rome - Colosseum (اٹلی)</option>
-                    <option value="bigben">🕰️ London - Big Ben (برطانیہ)</option>
+                    <option value="none">Transparent (بغیر بیک گراؤنڈ)</option>
+                    <option value="eiffel">🗼 Paris - Eiffel Tower (پیرس)</option>
+                    <option value="colosseum">🏛️ Rome - Colosseum (روم)</option>
+                    <option value="bigben">🕰️ London - Big Ben (لندن)</option>
                     <option value="alps">🏔️ Swiss Alps (سوئٹزرلینڈ)</option>
+                    <option value="white">⚪ Plain White (پاسپورٹ سفید)</option>
+                    <option value="blue">🔵 Plain Blue (پاسپورٹ نیلا)</option>
+                    <option value="red">🔴 Plain Red (پاسپورٹ سرخ)</option>
                 </select>
+
+                <input type="file" id="customBgInput" accept="image/*" style="display: none;">
+                <button class="action-btn custom-btn" id="customBgBtn">🖼️ Upload Custom BG (اپنی گیلری سے بیک گراؤنڈ لگائیں)</button>
             </div>
 
-            <a id="downloadBtn" class="action-btn download-btn" download="javed-ai-europe-photo.png">📥 Download Image (ڈاؤن لوڈ کریں)</a>
+            <a id="downloadBtn" class="action-btn download-btn" download="javed-ai-edited.png">📥 Download Image (ڈاؤن لوڈ کریں)</a>
         </div>
 
-        <!-- گوگل ایڈسینس کا ڈبا -->
+        <!-- ایڈسینس اشتہار کا ڈبا -->
         <div class="ad-box">
             <p>📢 <strong>Google AdSense Space</strong></p>
-            <small>Google Ads will display here for revenue!</small>
+            <small>Google Ads will display here for earnings!</small>
         </div>
     </div>
 
@@ -130,13 +136,14 @@
         const toolsSection = document.getElementById('toolsSection');
         const bgSelector = document.getElementById('bgSelector');
         const europeBgSelect = document.getElementById('europeBg');
+        const customBgInput = document.getElementById('customBgInput');
+        const customBgBtn = document.getElementById('customBgBtn');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
         let selectedFile = null;
         let cutOutImg = new Image();
 
-        // یورپ کی تصاویر کے لنکس
         const europeBgUrls = {
             eiffel: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=800',
             colosseum: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800',
@@ -170,7 +177,6 @@
             }
         });
 
-        // اے آئی بیک گراؤنڈ ریمور
         removeBgBtn.addEventListener('click', () => {
             if (!selectedFile) return;
 
@@ -205,20 +211,48 @@
             });
         });
 
-        // یورپ کا بیک گراؤنڈ ملانے والا فنکشن
         europeBgSelect.addEventListener('change', (e) => {
             renderComposite(e.target.value);
+        });
+
+        customBgBtn.addEventListener('click', () => {
+            customBgInput.value = null;
+            customBgInput.click();
+        });
+
+        customBgInput.addEventListener('change', (e) => {
+            const bgFile = e.target.files[0];
+            if (bgFile) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const customImg = new Image();
+                    customImg.onload = () => {
+                        canvas.width = cutOutImg.width;
+                        canvas.height = cutOutImg.height;
+                        ctx.drawImage(customImg, 0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(cutOutImg, 0, 0);
+                        updateDownload();
+                    };
+                    customImg.src = event.target.result;
+                }
+                reader.readAsDataURL(bgFile);
+            }
         });
 
         function renderComposite(bgKey) {
             canvas.width = cutOutImg.width;
             canvas.height = cutOutImg.height;
 
-            if (bgKey === 'none' || !europeBgUrls[bgKey]) {
+            if (bgKey === 'none') {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(cutOutImg, 0, 0);
                 updateDownload();
-            } else {
+            } else if (bgKey === 'white' || bgKey === 'blue' || bgKey === 'red') {
+                ctx.fillStyle = bgKey === 'white' ? '#ffffff' : (bgKey === 'blue' ? '#0055ff' : '#ff0000');
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(cutOutImg, 0, 0);
+                updateDownload();
+            } else if (europeBgUrls[bgKey]) {
                 const bgImg = new Image();
                 bgImg.crossOrigin = "anonymous";
                 bgImg.onload = () => {
