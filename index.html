@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ur" dir="rtl">
 <head>
@@ -35,17 +36,22 @@
             border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
+            text-decoration: none;
         }
         .bg-btn { background-color: #e67e22; }
-        .hd-btn { background-color: #2980b9; }
         .download-btn { background-color: #8e44ad; display: none; }
-        #preview {
+        #preview, #result {
             max-width: 100%;
             max-height: 400px;
             border-radius: 10px;
             margin-top: 15px;
-            display: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        #loading {
+            display: none;
+            color: #e67e22;
+            font-weight: bold;
+            margin: 15px 0;
         }
         .ad-box {
             margin-top: 25px;
@@ -60,20 +66,22 @@
 
     <div class="container">
         <h1>🎨 Free Photo Editor AI</h1>
-        <p>مفت اے آئی ٹولز - تصویر اپلوڈ کریں اور ایڈٹ کریں!</p>
+        <p>مفت اے آئی ٹولز - بیک گراؤنڈ ریموو کریں!</p>
         
         <hr>
 
         <input type="file" id="imageInput" accept="image/*" style="display: none;">
         <button class="action-btn" id="uploadTriggerBtn">🖼️ تصویر منتخب کریں (Upload)</button>
 
-        <img id="preview" src="" alt="منتخب کردہ تصویر">
+        <img id="preview" src="" alt="اصلی تصویر" style="display: none;">
+        
+        <div id="loading">⏳ اے آئی بیک گراؤنڈ ختم کر رہی ہے، برائے مہربانی چند سیکنڈ انتظار کریں...</div>
 
-        <!-- ملٹی فنکشن بٹنز -->
+        <img id="result" src="" alt="بغیر بیک گراؤنڈ کی تصویر" style="display: none;">
+
         <div id="toolsSection" style="display: none; margin-top: 15px;">
-            <button class="action-btn bg-btn" onclick="removeBackground()">✂️ بیک گراؤنڈ ریموو کریں (Remove BG)</button>
-            <button class="action-btn hd-btn" onclick="makeHD()">✨ HD کوالٹی بنائیں (HD Upscale)</button>
-            <a id="downloadBtn" class="action-btn download-btn" download="edited-image.png">📥 تصویر ڈاؤن لوڈ کریں</a>
+            <button class="action-btn bg-btn" id="removeBgBtn">✂️ بیک گراؤنڈ ریموو کریں (Remove BG)</button>
+            <a id="downloadBtn" class="action-btn download-btn" download="no-bg-image.png">📥 تصویر ڈاؤن لوڈ کریں (Download)</a>
         </div>
 
         <div class="ad-box">
@@ -86,8 +94,13 @@
         const imageInput = document.getElementById('imageInput');
         const uploadTriggerBtn = document.getElementById('uploadTriggerBtn');
         const preview = document.getElementById('preview');
+        const result = document.getElementById('result');
         const toolsSection = document.getElementById('toolsSection');
+        const removeBgBtn = document.getElementById('removeBgBtn');
         const downloadBtn = document.getElementById('downloadBtn');
+        const loading = document.getElementById('loading');
+
+        let selectedFile = null;
 
         uploadTriggerBtn.addEventListener('click', function() {
             imageInput.value = null;
@@ -95,32 +108,56 @@
         });
 
         imageInput.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
+            selectedFile = event.target.files[0];
+            if (selectedFile) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
+                    result.style.display = 'none';
+                    downloadBtn.style.display = 'none';
                     toolsSection.style.display = 'block';
                 }
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(selectedFile);
             }
         });
 
-        // بیک گراؤنڈ ریموو کرنے کا فنکشن
-        function removeBackground() {
-            alert("اے آئی بیک گراؤنڈ ریموو کر رہی ہے۔.. برائے مہربانی چند سیکنڈ انتظار کریں!");
-            // بیک گراؤنڈ ریموو اے آئی کنیکشن
-            downloadBtn.style.display = 'block';
-            downloadBtn.href = preview.src;
-        }
+        // اصلی اے آئی بیک گراؤنڈ ریموو فنکشن
+        removeBgBtn.addEventListener('click', function() {
+            if (!selectedFile) return;
 
-        // ایچ ڈی بنانے کا فنکشن
-        function makeHD() {
-            alert("تصویر کو ایچ ڈی (HD) بنایا جا رہا ہے۔.. چند سیکنڈ انتظار کریں!");
-            downloadBtn.style.display = 'block';
-            downloadBtn.href = preview.src;
-        }
+            loading.style.display = 'block';
+            toolsSection.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('image_file', selectedFile);
+            formData.append('size', 'auto');
+
+            fetch('https://api.remove.bg/v1.0/removebg', {
+                method: 'POST',
+                headers: {
+                    'X-Api-Key': 'XGEnbBRh8E65Nx64ja9D4SJQ'
+                },
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                loading.style.display = 'none';
+                toolsSection.style.display = 'block';
+                const url = URL.createObjectURL(blob);
+                result.src = url;
+                result.style.display = 'block';
+                preview.style.display = 'none';
+                downloadBtn.href = url;
+                downloadBtn.style.display = 'block';
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                toolsSection.style.display = 'block';
+                alert('بیک گراؤنڈ ریموو کرنے میں مسئلہ آیا ہے، دوبارہ کوشش کریں۔');
+                console.error(error);
+            });
+        });
     </script>
 
 </body>
